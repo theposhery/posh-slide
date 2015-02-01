@@ -1,0 +1,311 @@
+<link rel="import" href="../polymer/polymer.html">
+<link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+<!--
+Element providing solution to no problem in particular.
+
+##### Example
+
+    <posh-slide></posh-slide>
+
+@element atomic-slide
+@blurb Element providing solution to no problem in particular.
+@status alpha
+@homepage http://bengfarrell.github.io/atomic-slide
+-->
+<polymer-element name="posh-slide" attributes="notitle">
+
+  <template>
+    <link rel="stylesheet" href="posh-slide.css" />
+
+    <content>
+      <div id="background">
+        <div id="htmlinclude" class="htmlinclude"></div>
+        <div id="center_img" class="imgregion"></div>
+        <div id="center_full_img" class="imgregion_full"></div>
+        <div id="header_txt" class="txtregion font-effect-3d"></div>
+        <div id="footer_txt" class="txtregion font-effect-3d"></div>
+        <div id="left_txt" class="txtregion font-effect-3d"></div>
+        <div id="right_txt" class="txtregion font-effect-3d"></div>
+      </div>
+    </content>
+
+  </template>
+
+  <script>
+
+    Polymer('posh-slide', {
+      /**
+       * text regions
+       *
+       * @property slides
+       * @type array
+       */
+      txtRegions: [ 'header', 'footer', 'left', 'right' ],
+
+      /**
+       * image regions
+       *
+       * @property slides
+       * @type array
+       */
+      imgRegions: [ 'center', 'center_full' ],
+
+      /**
+       * image base path
+       *
+       * @property imgpath
+       * @type string
+       */
+      imgpath: "",
+
+      /**
+       * html template base path
+       *
+       * @property htmltemplatepath
+       * @type string
+       */
+      htmltemplatepath: "",
+
+      ready: function() {
+      },
+
+      /**
+       * getter for slide element
+       *
+       * @param {string} class name
+       * @return {array}
+       */
+      getHTMLIncludeElementsByClass: function(clazz) {
+        return this.$.htmlinclude.getElementsByClassName(clazz);
+      },
+
+      /**
+       * sets the html content of the slide via an HTML template
+       *
+       * @method set html template
+       * @param {String} template file
+       * @param {object} background properties
+       */
+      setHTML: function(template) {
+        this.loadResource(this.htmltemplatepath + '/' + template, this.onHTMLReceived);
+      },
+
+      /**
+       * on HTML callback for templates
+       *
+       * @method onHTMLRecieved
+       * @param {String} data
+       */
+      onHTMLReceived: function(data) {
+        this.$.htmlinclude.innerHTML = data;
+        this.executeScripts(this.$.htmlinclude);
+
+      },
+
+      /**
+       * sets the background image of the slide
+       *
+       * @method set background image
+       * @param {String} img
+       * @param {object} background properties
+       */
+      setBackgroundImage: function(img, props) {
+        if (!props) { props = {}; }
+        if (!props.bounds) { props.bounds = "contain"; }
+
+        this.$.background.style["background-size"] = props.bounds;
+        this.$.background.style.backgroundImage="url(" + this.resolveImage(img, this.imgpath) + ")";
+      },
+
+      /**
+       * set image
+       *
+       * @method set image
+       * @param {String} img
+       * @param {String} named region
+       */
+      setImage: function(img, region ) {
+        this.$[region + '_img'].style.backgroundImage = "url(" + this.resolveImage(img, this.imgpath) + ")";
+        this.removeClass(this.$[region + '_img'], 'hidden');
+      },
+
+      /**
+       * set text
+       *
+       * @method set text
+       * @param {String} text
+       * @param {String} named region
+       */
+      setText: function(text, region ) {
+        this.$[region + '_txt'].innerHTML = text;
+        this.removeClass(this.$[region + '_txt'], 'hidden');
+      },
+
+
+      /**
+       * clear slide
+       *
+       * @method clear
+       */
+      clear: function() {
+        this.clearBackgroundImage();
+        this.clearText();
+        this.clearImages();
+        this.clearHTMLTemplate();
+      },
+
+      /**
+       * clear text
+       *
+       * @method clear all text in regions
+       */
+      clearText: function() {
+        var self = this;
+        this.txtRegions.forEach( function(rg) {
+          self.$[rg + '_txt'].innerHTML = "";
+          self.addClass(self.$[rg + '_txt'], 'hidden');
+        });
+      },
+
+      /**
+       * clear images
+       *
+       * @method clear all images in regions
+       */
+      clearImages: function() {
+        var self = this;
+        this.imgRegions.forEach( function(rg) {
+          self.$[rg + '_img'].style.backgroundImage = null;
+          self.addClass(self.$[rg + '_img'], 'hidden');
+        });
+      },
+
+      /**
+       * clear background image
+       *
+       * @method clear background image
+       */
+      clearBackgroundImage: function() {
+        this.$.background.style.backgroundImage = null;
+      },
+
+      /**
+       * clear html template
+       *
+       * @method clear html template
+       */
+      clearHTMLTemplate: function() {
+        this.$.htmlinclude.innerHTML = "";
+      },
+
+      /**
+       * add a class to an element
+       *
+       * @method addClass
+       * @param {object} element
+       * @param {string} class
+       */
+      addClass: function(elem, cls) {
+        var classes = elem.getAttribute('class');
+        var clist = classes.split(' ');
+        if (clist.indexOf(cls) < 0) {
+          clist.push(cls);
+          elem.setAttribute('class', clist.join(' '));
+        }
+      },
+
+      /**
+       * add a class to an element
+       *
+       * @method addClass
+       * @param {object} element
+       * @param {string} class
+       */
+      removeClass: function(elem, cls) {
+        var classes = elem.getAttribute('class');
+        var clist = classes.split(' ');
+        if (clist.indexOf(cls) >= 0) {
+          clist.splice(clist.indexOf(cls), 1)
+          elem.setAttribute('class', clist.join(' '));
+        }
+      },
+
+      /**
+       * resolve an image
+       *
+       * @method resolve image
+       * @param {string} img
+       * @param {string} base path
+       */
+      resolveImage: function(img, base) {
+        if (img.substr(0, 4) == "http") {
+          return img;
+        }
+        if (img.substr(0, 4) == "file") {
+          return img;
+        }
+
+        return base + "/" + img;
+      },
+
+      /**
+       * load a resource (whether through local filesystem or AJAX)
+       *
+       * @method loadResource
+       * @param {string} resource
+       * @param {function} callback
+       */
+      loadResource: function(resource, cb) {
+        var self = this;
+        var response;
+        var fs = require('fs');
+
+        if (fs) { // are we using node?
+          response = fs.readFileSync(resource);
+          cb.apply(self, [response]);
+          return;
+        }
+
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+          if (xmlhttp.readyState == 4 ) {
+            if(xmlhttp.status == 200) {
+              response = xmlhttp.responseText;
+            } else {
+              response = '<span>Slide Content is missing, please check your path</span>';
+            }
+            cb.apply(self, [response]);
+          }
+        }
+        //xmlhttp.open("GET", "slides/htmlincludes/" + template, true);
+        xmlhttp.open("GET", resource, true);
+        xmlhttp.send();
+      },
+
+      /**
+       * execute scripts on loaded HTML
+       *
+       * @method executeScripts
+       * @param {object} node
+       */
+      executeScripts: function(node) {
+        if ( node.nodeName == "SCRIPT" ) {
+          var script = document.createElement("script");
+          script.text = node.innerHTML;
+          node.parentNode.replaceChild(script, node);
+        } else {
+          var i = 0;
+          var children = node.childNodes;
+          while ( i < children.length) {
+            this.executeScripts( children[i] );
+            i++;
+          }
+        }
+        return node;
+      }
+    });
+
+  </script>
+
+</polymer-element>
