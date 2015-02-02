@@ -2,16 +2,14 @@
 <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
 
 <!--
-Element providing solution to no problem in particular.
+a slide in a posh-preso
 
 ##### Example
 
     <posh-slide></posh-slide>
 
-@element atomic-slide
-@blurb Element providing solution to no problem in particular.
-@status alpha
-@homepage http://bengfarrell.github.io/atomic-slide
+@element posh-slide
+@blurb a slide in a posh-preso
 -->
 <polymer-element name="posh-slide" attributes="notitle">
 
@@ -39,7 +37,7 @@ Element providing solution to no problem in particular.
       /**
        * text regions
        *
-       * @property slides
+       * @property txtRegions
        * @type array
        */
       txtRegions: [ 'header', 'footer', 'left', 'right', 'center' ],
@@ -47,7 +45,7 @@ Element providing solution to no problem in particular.
       /**
        * image regions
        *
-       * @property slides
+       * @property imgRegions
        * @type array
        */
       imgRegions: [ 'center', 'center_full' ],
